@@ -51,6 +51,6 @@ def convert_json_to_excel(json_file, excel_file):
     writer.save()
 
 # Example usage
-json_file = r"C:\Users\mohit\Desktop\unece.json"
-excel_file = r"C:\Users\mohit\Desktop\spaceCompanies.xlsx"
+json_file = "unece.json" # path to json file
+excel_file = "spaceCompanies.xlsx" # path to excel file
 convert_json_to_excel(json_file, excel_file)
