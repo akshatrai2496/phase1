@@ -1,0 +1,56 @@
+import pandas as pd
+import json
+
+def convert_json_to_excel(json_file, excel_file):
+    # Load JSON data into a Python object
+    with open(json_file) as f:
+        data = json.load(f)
+
+    # Create an empty DataFrame
+    dfs = []
+
+    # Iterate over each dictionary in the list
+    for item in data:
+        # Flatten the dictionary into a series
+        series = pd.json_normalize(item, sep='.')
+
+        # Append the series to the DataFrame list
+        dfs.append(series)
+
+    # Concatenate the DataFrames into a single DataFrame
+    df = pd.concat(dfs, ignore_index=True)
+
+    # Create an Excel writer object
+    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+
+    # Convert the DataFrame to an Excel sheet
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+
+    # Get the workbook and the worksheet
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+
+    # Set formatting options to enhance the visual representation
+    header_format = workbook.add_format({'bold': True, 'bg_color': '#FFFF00'})
+    cell_format = workbook.add_format({'text_wrap': True})
+
+    # Apply formatting to the header row
+    for col_num, value in enumerate(df.columns.values):
+        worksheet.write(0, col_num, value, header_format)
+        worksheet.set_column(col_num, col_num, len(str(value)) + 2)
+
+    # Apply formatting to the data cells
+    for row_num, row_data in enumerate(df.values):
+        for col_num, cell_value in enumerate(row_data):
+            if isinstance(cell_value, dict):
+                cell_value = json.dumps(cell_value)  # Convert dictionary to string representation
+            worksheet.write(row_num + 1, col_num, cell_value, cell_format)
+            worksheet.set_column(col_num, col_num, max(len(str(cell_value)) + 2, 10))
+
+    # Save the Excel file
+    writer.save()
+
+# Example usage
+json_file = r"C:\Users\mohit\Desktop\unece.json"
+excel_file = r"C:\Users\mohit\Desktop\spaceCompanies.xlsx"
+convert_json_to_excel(json_file, excel_file)
